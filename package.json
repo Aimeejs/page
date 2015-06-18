@@ -1,0 +1,27 @@
+{
+	"name": "aimee-page",
+	"description": "UZ构建工具page模块，用于生成Aimee-page的类",
+	"main": "page.js",
+	"version": "1.0.0",
+	"scripts": {
+		"test": "uz -v"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/gavinning/aimee-page.git"
+	},
+	"keywords": [
+		"aimee-page",
+		"aimee",
+		"uz"
+	],
+	"author": "gavinning",
+	"license": "GPL",
+	"bugs": {
+		"url": "https://github.com/gavinning/aimee-page/issues"
+	},
+	"homepage": "https://github.com/gavinning/aimee-page",
+	"dependencies": {
+		"aimee-pm": "*"
+	}
+}
