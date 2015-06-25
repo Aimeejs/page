@@ -18,14 +18,12 @@ home
 // 基本使用，定义一个 aimee-page
 var Page = require('page');
 var page = new Page;
-var mock = require('mock').mock;
 
 page.extend({
 	name: 'home',
-	mock: mock(require('./home.json')),
 	template: require('./home.jade'),
 
-	bind: function(){
+	bind: function(data){
 		// 多app调用
 		this.exports('header footer teamCard', function(app){
 			app.render();

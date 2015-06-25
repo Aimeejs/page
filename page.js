@@ -1,7 +1,6 @@
-// author: gavinning
-
 var pm = require('pm');
 var guid = require('guid');
+var page;
 
 function Page() {
 	this.name = 'page';
@@ -10,20 +9,80 @@ function Page() {
 		return '#lincowebapp-page-' + this.name;
 	}
 };
+
+// 私有方法
+$.extend(Page, {
+
+	renderId: function(){
+		return page.renderString + page.name;
+	},
+
+	// Mockjs 模拟数据
+	mock: function(fn){
+		var mock = require('mock').mock;
+		var data = require('pages/' + page.name + '/' + page.name + '.json.js');
+		
+		fn(mock(data));
+		console.log('data corss mock.');
+	},
+
+	// Mock or ajax
+	ajax: function(fn){
+		// 线上环境
+		if(config.env === 'online' || config.env === 'dev' || config.env === 'test'){
+			return $.ajax(Page.ajaxOptions(fn));
+		};
+
+		// mockjs模拟数据
+		if(config.env === 'mockjs' || config.env === 'mock'){
+			return this.mock(fn)
+		}
+	},
+
+	ajaxOptions: function(fn){
+		var opt, options, success;
+
+		options = {};
+		options.dataType = 'json';
+		success = function(data, msg, xhr){
+			!fn || fn(data);
+			!page.ajaxconfig.success || page.ajaxconfig.success(data, msg, xhr);
+		};
+		opt = $.extend({}, options, page.ajaxconfig);
+		opt.success = success;
+
+		// 检查ajax url地址
+		if(!opt.url){
+			console.warn('Warning: Not found ajax url.')
+		}
+
+		return opt;
+	}
+
+});
+
 // 虚拟页面公共方法
 Page.prototype = {
 	extend: function(){
 		$.extend.apply(null, [this].concat([].slice.call(arguments, 0)))
 	},
 
-	renderId: function(){
-		return this.renderString + this.name;
+	error: function(code, msg){
+		var errorHash = {};
+
+		if(typeof code === 'string'){
+			msg = code;
+			code = 0;
+		}
+
+		code ? console.error(errorHash[code]) : console.error(msg);
 	},
 
 	// 页面实例初始化方法
 	init: function(){
+		page = this;
 		this.render();
-		this.bind();
+		this.guid = guid();
 		this.inited = true;
 	},
 
@@ -33,14 +92,31 @@ Page.prototype = {
 		this.inited ? $(this.pageId()).show() : this.init();
 	},
 
+	// 渲染到页面
+	render: function(id){
+		Page.ajax(function(data){
+			$(id || '#' + Page.renderId()).replaceWith(page.template(data));
+			page.bind(data);
+		});
+	},
+
+	append: function(id){
+		Page.ajax(function(data){
+			$(id).append(page.template(data));
+			page.bind(data);
+		});
+	},
+
+	prepend: function(id){
+		Page.ajax(function(data){
+			$(id).prepend(page.template(data));
+			page.bind(data);
+		});
+	},
+
 	// 页面实例离开方法
 	leave: function(){
 		$(this.pageId()).hide();
-	},
-
-	// 页面回退方法，默认调用系统回退
-	back: function(){
-
 	},
 
 	// 组件事件绑定
@@ -48,35 +124,14 @@ Page.prototype = {
 
 	},
 
-	// 渲染到页面
-	render: function(id, data){
-		$(id || '#' + this.renderId()).replaceWith(this.html(data));
-		this.guid = guid();
-	},
+	// 页面回退方法，默认调用系统回退
+	back: function(){
 
-	append: function(id, data){
-		$(id).append(this.html(data));
-		this.bind();
-	},
-
-	prepend: function(id, data){
-		$(id).prepend(this.html(data));
-		this.bind();
-	},
-
-	// 返回html
-	html: function(data){
-		return this.template(this.data(data))
-	},
-
-	// 返回组合数据
-	data: function(data){
-		return $.extend({}, this.mock, data || {})
 	},
 
 	// 页面注册
 	reg: function(id){
-		this._id = id;
+		this._id = id || '/' + this.name;
 		pm.reg(this);
 		pm.cache();
 	},
