@@ -67,6 +67,10 @@ Page.prototype = {
 		$.extend.apply(null, [this].concat([].slice.call(arguments, 0)))
 	},
 
+	page: function(){
+		return $(this.pageId());
+	},
+
 	error: function(code, msg){
 		var errorHash = {};
 
@@ -146,7 +150,7 @@ Page.prototype = {
 
 		this.app[app.name] ? '' : this.app[app.name] = [];
 		this.app[app.name].push(app);
-		!fn || fn(app);
+		!fn || fn.call(this, app);
 	},
 
 	// 组件注册
