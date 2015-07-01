@@ -1,27 +1,38 @@
-var pm = require('pm');
-var guid = require('guid');
-var page;
+/**
+ * Aimee-page
+ * Author by gavinning
+ * Homepage https://github.com/gavinning/aimee-page
+ */
 
-function Page() {
-	this.name = 'page';
-	this.renderString = 'lincoapp-page-';
-	this.pageId = function(){
-		return '#lincowebapp-page-' + this.name;
-	}
+var pm, guid, Class, Page, page;
+
+pm = require('pm');
+guid = require('guid');
+Class = require('class');
+Page = Class.create();
+Page.version = '1.0.0';
+Page.aimee = {
+	page: true
 };
 
-// 私有方法
-$.extend(Page, {
+Page.fn.extend({
+	name: 'page',
+	renderString: 'lincoapp-page-',
+	pageId: function(){
+		return '#lincowebapp-page-' + this.name;
+	}
+});
 
+Page.extend({
 	renderId: function(){
 		return page.renderString + page.name;
 	},
 
-	// Mockjs 模拟数据
+	// Mockjs 模拟数据，仅用于测试
 	mock: function(fn){
 		var mock = require('mock').mock;
 		var data = require('pages/' + page.name + '/' + page.name + '.json.js');
-		
+
 		fn(mock(data));
 		console.log('data corss mock.');
 	},
@@ -62,15 +73,7 @@ $.extend(Page, {
 });
 
 // 虚拟页面公共方法
-Page.prototype = {
-	extend: function(){
-		$.extend.apply(null, [this].concat([].slice.call(arguments, 0)))
-	},
-
-	page: function(){
-		return $(this.pageId());
-	},
-
+Page.fn.extend({
 	error: function(code, msg){
 		var errorHash = {};
 
@@ -92,39 +95,60 @@ Page.prototype = {
 
 	// 页面实例进入方法
 	// 每次需要执行方法放到这里
+	// 页面实例可重写此方法，但不建议，基本所有功能都可以通过重写 page.prerender, page.postrender, page.bind 来实现
 	enter: function(){
-		this.inited ? $(this.pageId()).show() : this.init();
+		this.inited ? this.getPage().show() : this.init();
 	},
 
 	// 渲染到页面
 	render: function(id){
+		var page = this;
 		Page.ajax(function(data){
-			$(id || '#' + Page.renderId()).replaceWith(page.template(data));
-			page.bind(data);
+			var thisPage;
+
+			// 缓存页面jQuery对象
+			thisPage = $(page.template(data));
+
+			// 页面渲染预处理
+			page.prerender(data, thisPage);
+
+			// 执行页面渲染
+			$(id || '#' + Page.renderId()).replaceWith(thisPage);
+
+			// 页面渲染后处理
+			page.postrender(data, thisPage);
+
+			// 执行事件绑定
+			page.bind(data, thisPage);
+
+			page._page = thisPage;
 		});
 	},
 
-	append: function(id){
-		Page.ajax(function(data){
-			$(id).append(page.template(data));
-			page.bind(data);
-		});
-	},
-
-	prepend: function(id){
-		Page.ajax(function(data){
-			$(id).prepend(page.template(data));
-			page.bind(data);
-		});
+	getPage: function(){
+		return this._page;
 	},
 
 	// 页面实例离开方法
 	leave: function(){
-		$(this.pageId()).hide();
+		this.getPage().hide();
 	},
 
-	// 组件事件绑定
-	bind: function(){
+	// 页面渲染之前预处理，可以用来预加载页面模块
+	// 页面实例重写此方法
+	prerender: function(data, thisPage){
+
+	},
+
+	// 页面渲染之后处理，绑定方法之前执行
+	// 页面实例重写此方法
+	postrender: function(data, thisPage){
+
+	},
+
+	// 页面级事件绑定
+	// 页面实例重写此方法
+	bind: function(data, thisPage){
 
 	},
 
@@ -141,16 +165,27 @@ Page.prototype = {
 	},
 
 	export: function(App, fn){
+		var thisPage;
 		var app = new App;
 		this.app ? '' : this.app = {};
 
+		// 用于简单调用模块，仅用于开发测试环境
+		if(typeof fn === 'object'){
+			thisPage = fn;
+			fn = null;
+		};
+
+		// 检查重复加载
 		if(this.app[app.guid]){
 			return console.error(app.guid + ' is exist');
 		};
 
+		// 缓存app对象到页面
 		this.app[app.name] ? '' : this.app[app.name] = [];
 		this.app[app.name].push(app);
-		!fn || fn.call(this, app);
+
+		// 没有回调时自动渲染，仅用于开发测试环境
+		fn ? fn.call(this, app) : app.compile().setPage(thisPage).render();
 	},
 
 	// 组件注册
@@ -178,6 +213,6 @@ Page.prototype = {
 		};
 	}
 
-};
+});
 
 module.exports = Page;
