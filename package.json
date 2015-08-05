@@ -16,12 +16,14 @@
 		"uz"
 	],
 	"author": "gavinning",
-	"license": "GPL",
+	"license": "GPL-3.0",
 	"bugs": {
 		"url": "https://github.com/gavinning/aimee-page/issues"
 	},
 	"homepage": "https://github.com/gavinning/aimee-page",
 	"dependencies": {
-		"aimee-pm": "*"
+		"aimee-pm": "*",
+		"aimee-guid": "*",
+		"aimee-class": "*"
 	}
 }
