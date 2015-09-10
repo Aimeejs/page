@@ -191,6 +191,10 @@ Page.fn.extend({
         // 缓存app对象到页面
         this.app[app.name] ? '' : this.app[app.name] = [];
         this.app[app.name].push(app);
+        // 定义get方法用于获取app实例
+        this.app[app.name].get = function(index){
+            return this[index || 0]
+        };
 
         // 存储需要添加的属性
         // 标记当前app在同类app数组中的位置
@@ -249,6 +253,11 @@ Page.fn.extend({
      */
     search: function(id, index, fn){
         !fn || fn.call(this.app[id][index], this.app[id][index]);
+        return this;
+    },
+
+    query: function(){
+        this.search.apply(arguments);
         return this;
     }
 
