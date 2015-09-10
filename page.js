@@ -76,6 +76,8 @@ Page.fn.extend({
     // 注册pm引用
     pm: pm,
 
+    display: false,
+
     error: function(code, msg){
         var errorHash = {};
 
@@ -117,6 +119,7 @@ Page.fn.extend({
             // 缓存页面jQuery对象
             thisPage = $(page.template(data));
 
+            page.include(data, page);
             // 页面渲染预处理
             page.prerender(data, thisPage);
 
@@ -140,6 +143,10 @@ Page.fn.extend({
     // 页面实例离开方法
     leave: function(){
         this.getPage().hide();
+    },
+
+    include: function(){
+
     },
 
     // 页面渲染之前预处理，可以用来预加载页面模块
@@ -192,8 +199,18 @@ Page.fn.extend({
         this.app[app.name] ? '' : this.app[app.name] = [];
         this.app[app.name].push(app);
         // 定义get方法用于获取app实例
-        this.app[app.name].get = function(index){
-            return this[index || 0]
+        this.app[app.name].get = function(index, fn){
+            if(typeof index === 'function'){
+                fn = index;
+                index = 0;
+            }
+
+            if(typeof fn === 'function'){
+                fn.call(this[index], this[index])
+            }
+            else{
+                return this[typeof index === 'number' ? index : 0];
+            }
         };
 
         // 存储需要添加的属性
