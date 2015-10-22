@@ -2,7 +2,7 @@
 	"name": "aimee-page",
 	"description": "UZ构建工具page模块，用于生成Aimee-page的类",
 	"main": "page.js",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"scripts": {
 		"test": "uz -v"
 	},

@@ -114,30 +114,36 @@ Page.fn.extend({
     render: function(id){
         var page = this;
         Page.ajax(function(data){
-            var thisPage;
-
             // 缓存页面jQuery对象
-            thisPage = $(page.template(data));
+            page._page = $(page.template(data));
+
+            // 执行内部预处理
+            page._prerender(data, page._page)
 
             page.include(data, page);
             // 页面渲染预处理
-            page.prerender(data, thisPage);
+            page.prerender(data, page._page);
 
             // 执行页面渲染
-            $(id || '#' + Page.renderId()).replaceWith(thisPage);
+            $(id || '#' + Page.renderId()).replaceWith(page._page);
 
             // 页面渲染后处理
-            page.postrender(data, thisPage);
+            page.postrender(data, page._page);
 
             // 执行事件绑定
-            page.bind(data, thisPage);
+            page.bind(data, page._page);
 
-            page._page = thisPage;
+            // 执行内部后处理
+            page._postrender(data, page._page)
         });
     },
 
     getPage: function(){
-        return this._page;
+        return this._page || $();
+    },
+
+    find: function(selector){
+        return this.getPage().find(selector);
     },
 
     // 页面实例离开方法
@@ -146,6 +152,16 @@ Page.fn.extend({
     },
 
     include: function(){
+
+    },
+
+    // 内部使用，不允许覆盖
+    _prerender: function(data, thisPage){
+        thisPage.addClass('page-' + this.name)
+    },
+
+    // 内部使用，不允许覆盖
+    _postrender: function(data, thisPage){
 
     },
 
@@ -180,7 +196,6 @@ Page.fn.extend({
     },
 
     export: function(App, fn){
-        var thisPage;
         var app = new App;
         this.app ? '' : this.app = {};
 
@@ -225,7 +240,11 @@ Page.fn.extend({
         app.pm = this.pm;
 
         // 没有回调时自动渲染，仅用于开发测试环境
-        fn ? fn.call(app, app) : app.compile().setPage(thisPage).render();
+        fn ? fn.call(this, app, this) : app.init().render();
+
+        if(!fn){
+            return app;
+        }
     },
 
     /**
@@ -238,26 +257,31 @@ Page.fn.extend({
 
         // id === string
         if(typeof id === 'string'){
-            id.split(' ').length > 0 ?
-                this.exports(id.split(' '), fn):
-                this.export(require(id), fn)
+            // 多个组件调用，返回page对象
+            if(id.split(' ').length > 1){
+                this.exports(id.split(' '), fn);
             return this;
+        }
+            // 单个组件调用返回app对象
+            else{
+                return this.export(require(id), fn);
+            }
         }
 
         // id === aimee.app
+        // 单个组件调用返回app对象
         else if($.type(id) === 'function' && id.aimee){
-            this.export(id, fn);
-            return this;
+            return this.export(id, fn);
         }
 
         // id === array
+        // 多个组件调用，返回page对象
         else if(Array.isArray(id)){
             id.forEach(function(item){
                 self.export(require(item), fn)
             });
             return this;
         };
-
         return this;
     },
 
@@ -269,13 +293,17 @@ Page.fn.extend({
      * @return {[type]}         当前页面对象
      */
     search: function(id, index, fn){
-        !fn || fn.call(this.app[id][index], this.app[id][index]);
-        return this;
+
+        if(fn){
+            fn.call(this.app[id][index], this.app[id][index])
+        }
+        else{
+            return this.app[id][index];
+        }
     },
 
     query: function(){
-        this.search.apply(arguments);
-        return this;
+        return this.search.apply(this, arguments);
     }
 
 });
