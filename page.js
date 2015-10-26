@@ -67,6 +67,18 @@ Page.extend({
         }
 
         return opt;
+    },
+
+    // 执行处理app.pagerender
+    pagerender: function(page){
+        var map, arr;
+        map = page.app;
+        for(var key in map){
+            arr = map[key];
+            arr.forEach(function(app){
+                app.pagerender(app)
+            })
+        }
     }
 
 });
@@ -133,8 +145,8 @@ Page.fn.extend({
             // 执行事件绑定
             page.bind(data, page._page);
 
-            // 执行内部后处理
-            page._postrender(data, page._page)
+            // 执行app.pagerender方法
+            Page.pagerender(page);
         });
     },
 
