@@ -1,7 +1,7 @@
 /**
- * Aimee-page
+ * Page for Aimeejs
  * Author by gavinning
- * Homepage https://github.com/gavinning/aimee-page
+ * Homepage https://github.com/Aimeejs/page
  */
 
 var pm, aimee, config, Class, Page, page;
@@ -114,7 +114,7 @@ Page.fn.extend({
     // 每次需要执行方法放到这里
     // 页面实例可重写此方法，但不建议，基本所有功能都可以通过重写 page.prerender, page.postrender, page.bind 来实现
     enter: function(){
-        
+
     },
 
     __enter: function(){

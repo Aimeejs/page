@@ -1,26 +1,28 @@
 {
-	"name": "page",
-	"description": "Aimeejs的page模块",
-	"main": "page.js",
-	"version": "1.0.0",
-	"scripts": {
-		"test": "uz -v"
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/gavinning/aimee-page.git"
-	},
-	"keywords": [
-		"aimee-page",
-		"aimee",
-		"uz"
-	],
-	"author": "gavinning",
-	"license": "GPL-3.0",
-	"bugs": {
-		"url": "https://github.com/gavinning/aimee-page/issues"
-	},
-	"homepage": "https://github.com/gavinning/aimee-page",
-	"dependencies": {
-	}
+    "name": "page",
+    "aimee": "app",
+    "version": "1.0.0",
+    "description": "Aimeejs的page模块，支持虚拟页",
+    "main": "page.js",
+    "scripts": {
+        "test": "uz -v"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Aimeejs/page.git"
+    },
+    "keywords": [
+        "page",
+        "aimee",
+        "aimee-page",
+        "uz"
+    ],
+    "author": "gavinning",
+    "license": "GPL-3.0",
+    "bugs": {
+        "url": "https://github.com/Aimeejs/page/issues"
+    },
+    "homepage": "https://github.com/Aimeejs/page",
+    "dependencies": {
+    }
 }
