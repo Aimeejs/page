@@ -133,20 +133,21 @@ Page.fn.extend({
             page._prerender(data, page._page)
 
             page.include(data, page);
+            
             // 页面渲染预处理
             page.prerender(data, page._page);
-
-            // 执行页面渲染
-            $(id || '#' + Page.renderId()).replaceWith(page._page);
-
-            // 页面渲染后处理
-            page.postrender(data, page._page);
 
             // 执行事件绑定
             page.bind(data, page._page);
 
+            // 执行页面渲染 page.render
+            $(id || '#' + Page.renderId()).replaceWith(page._page);
+
             // 执行app.pagerender方法
             Page.pagerender(page);
+
+            // 页面渲染后处理
+            page.postrender(data, page._page);
         });
     },
 
@@ -305,7 +306,15 @@ Page.fn.extend({
      * @return {[type]}         当前页面对象
      */
     search: function(id, index, fn){
+        if(!index || index === 0){
+            index = 0;
+        }
 
+        if(typeof index === 'function'){
+            fn = index;
+            index = 0;
+        }
+        
         if(fn){
             fn.call(this.app[id][index], this.app[id][index])
         }
