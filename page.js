@@ -87,19 +87,8 @@ Page.extend({
 Page.fn.extend({
     // 注册pm引用
     pm: pm,
-
+    // 观察页面显示与隐藏
     display: false,
-
-    error: function(code, msg){
-        var errorHash = {};
-
-        if(typeof code === 'string'){
-            msg = code;
-            code = 0;
-        }
-
-        code ? console.error(errorHash[code]) : console.error(msg);
-    },
 
     // 页面实例初始化方法
     init: function(){
@@ -155,6 +144,8 @@ Page.fn.extend({
         return this._page || $();
     },
 
+    // 底层框架的调用入口
+    // 类似：$(parent).find(child)
     find: function(selector){
         return this.getPage().find(selector);
     },
@@ -277,7 +268,7 @@ Page.fn.extend({
         }
             // 单个组件调用返回app对象
             else{
-                return this.export(require(id), fn);
+                return this.export(aimee.virtualMap[id] || require(id), fn);
             }
         }
 
@@ -291,7 +282,7 @@ Page.fn.extend({
         // 多个组件调用，返回page对象
         else if(Array.isArray(id)){
             id.forEach(function(item){
-                self.export(require(item), fn)
+                self.export(aimee.virtualMap[item] || require(item), fn)
             });
             return this;
         };
@@ -325,6 +316,14 @@ Page.fn.extend({
 
     query: function(){
         return this.search.apply(this, arguments);
+    },
+
+    running: function(){
+        var page = this;
+        [].slice.call(arguments, 0)
+        .forEach(function(item){
+            item.call(page)
+        })
     }
 
 });
