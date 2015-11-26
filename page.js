@@ -200,12 +200,14 @@ Page.fn.extend({
     },
 
     export: function(App, fn){
+        var data = {};
         var app = new App;
         this.app ? '' : this.app = {};
 
-        // 用于简单调用模块，仅用于开发测试环境
+        // 检查简单调用
+        // data === fn
         if(typeof fn === 'object'){
-            thisPage = fn;
+            data = fn;
             fn = null;
         };
 
@@ -244,7 +246,7 @@ Page.fn.extend({
         app.pm = this.pm;
 
         // 没有回调时自动渲染，仅用于开发测试环境
-        fn ? fn.call(this, app, this) : app.init().render();
+        fn ? fn.call(this, app, this) : app.init(data).render();
 
         if(!fn){
             return app;
