@@ -1,3 +1,7 @@
+v1.0.4
+---
+修改page.exports回调的this指向，修改后指向调用的app
+
 v1.0.3
 ---
 优化page.exports方法，允许传入数据快捷调用

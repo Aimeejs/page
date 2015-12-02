@@ -246,7 +246,7 @@ Page.fn.extend({
         app.pm = this.pm;
 
         // 没有回调时自动渲染，仅用于开发测试环境
-        fn ? fn.call(this, app, this) : app.init(data).render();
+        fn ? fn.call(app, app, this) : app.init(data).render();
 
         if(!fn){
             return app;
