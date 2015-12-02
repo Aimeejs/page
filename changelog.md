@@ -1,3 +1,7 @@
+v1.0.5
+---
+Page原型链新增Page.fn.aimee.page属性，默认为true，用于检查是否为页面实例
+
 v1.0.4
 ---
 修改page.exports回调的this指向，修改后指向调用的app

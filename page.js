@@ -13,13 +13,13 @@ Class = aimee.Class;
 
 Page = Class.create();
 Page.version = '1.0.0';
-Page.aimee = {
-    page: true
-};
 
 Page.fn.extend({
     name: 'page',
-    renderString: 'lincoapp-page-'
+    renderString: 'lincoapp-page-',
+    aimee: {
+        page: true
+    }
 });
 
 Page.extend({
