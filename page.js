@@ -38,9 +38,13 @@ Page.extend({
 
     // Mock or ajax
     ajax: function(fn){
+        var options;
+        
         // 线上环境
         if(config.env === 'online' || config.env === 'dev' || config.env === 'test'){
-            return $.ajax(Page.ajaxOptions(fn));
+            options = this.ajaxOptions(fn);
+            return !options.url || options.url === '/tmp/test.json' ?
+                fn({}) : $.ajax(Page.ajaxOptions(fn))
         };
 
         // mockjs模拟数据

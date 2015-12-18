@@ -1,3 +1,7 @@
+v1.0.6
+---
+优化Page.ajax方法，在非mock模式下，验证是否存在有效ajax.url，非mock模式下兼容调用mock数据
+
 v1.0.5
 ---
 Page原型链新增Page.fn.aimee.page属性，默认为true，用于检查是否为页面实例
