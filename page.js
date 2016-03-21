@@ -4,23 +4,22 @@
  * Homepage https://github.com/Aimeejs/page
  */
 
-var pm, aimee, config, Class, Page, page;
+var Page, page, pm, aimee, Class, zeptoArray;
 
 pm = require('pm');
 aimee = require('aimee');
-config = aimee.getConfig();
-Class = aimee.Class;
+Class = require('class');
+Page = module.exports = Class.create();
 
-Page = Class.create();
-Page.version = '1.0.0';
-
-Page.fn.extend({
-    name: 'page',
-    renderString: 'lincoapp-page-',
-    aimee: {
-        page: true
+// Method Extend From Zepto
+zeptoArray = ('show hide on off delegate undelegate addClass removeClass ' +
+             'append prepend').split(' ');
+zeptoArray.forEach(function(name){
+    Page.fn[name] = function(){
+        $.fn[name].apply(this.getPage(), arguments)
+        return this;
     }
-});
+})
 
 Page.extend({
     renderId: function(){
@@ -38,32 +37,32 @@ Page.extend({
 
     // Mock or ajax
     ajax: function(fn){
-        var options;
-        
-        // 线上环境
-        if(config.env === 'online' || config.env === 'dev' || config.env === 'test'){
-            options = this.ajaxOptions(fn);
-            return !options.url || options.url === '/tmp/test.json' ?
-                fn({}) : $.ajax(Page.ajaxOptions(fn))
-        };
-
-        // mockjs模拟数据
-        if(config.env === 'mockjs' || config.env === 'mock'){
-            return this.mock(fn)
-        }
+        var options = this.ajaxOptions(fn);
+        !options.url || options.url === '/tmp/test.json' ?
+            this.mock(fn) :
+            $.ajax(Page.ajaxOptions(fn))
     },
 
     ajaxOptions: function(fn){
-        var opt, options, success;
+        var opt, options;
 
         options = {};
         options.dataType = 'json';
-        success = function(data, msg, xhr){
+
+        // Merge
+        opt = $.extend({}, options, page.ajaxconfig);
+
+        // 数据请求成功
+        opt.success = function(data, msg, xhr){
             !fn || fn(data);
             !page.ajaxconfig.success || page.ajaxconfig.success(data, msg, xhr);
-        };
-        opt = $.extend({}, options, page.ajaxconfig);
-        opt.success = success;
+        }
+
+        // 数据请求失败
+        opt.error = function(xhr, msg){
+            !fn || fn({code: 1, msg: msg});
+            !page.ajaxconfig.error || page.ajaxconfig.error(data, msg, xhr);
+        }
 
         // 检查ajax url地址
         if(!opt.url){
@@ -71,6 +70,16 @@ Page.extend({
         }
 
         return opt;
+    },
+
+    // 内部使用，不允许覆盖
+    prerender: function(data, thisPage){
+        thisPage.addClass('page-' + page.name)
+    },
+
+    // 内部使用，不允许覆盖
+    postrender: function(data, thisPage){
+
     },
 
     // 执行处理app.pagerender
@@ -84,123 +93,152 @@ Page.extend({
             })
         }
     }
+})
 
-});
+// Base
+Page.include({
+    name: 'page',
+    renderString: 'lincoapp-page-',
+    aimee: {
+        page: true
+    }
+})
 
-// 虚拟页面公共方法
-Page.fn.extend({
-    // 注册pm引用
-    pm: pm,
-    // 观察页面显示与隐藏
-    display: false,
-
+// Core
+Page.include({
     // 页面实例初始化方法
-    init: function(){
+    init: function(selector){
         page = this;
         this.app = {};
-        this.render();
+        this.render(selector);
         this.guid = aimee.guid();
         this.inited = true;
     },
 
-    // 页面实例进入方法
-    // 每次需要执行方法放到这里
-    // 页面实例可重写此方法，但不建议，基本所有功能都可以通过重写 page.prerender, page.postrender, page.bind 来实现
-    enter: function(){
-
+    // 页面注册 => PM
+    reg: function(id){
+        this._id = id || '/' + this.name;
+        pm.reg(this);
     },
 
-    __enter: function(){
+    // 页面加载 => PM
+    load: function(){
+        // 更新目标页面状态
+        this.display = true;
+        // 加载页面
         this.inited ? this.getPage().show() : this.init();
-        this.enter();
+        // 执行用户自定义enter操作
+            this.enter();
+    },
+
+    // 页面离开 => PM
+    unload: function(){
+        // 更新目标页面状态
+        this.display = false;
+        // 页面隐藏
+        this.getPage().hide();
+        // 执行用户自定义leave操作
+        this.leave();
+    },
+
+    // 页面重载
+    reload: function(){
+        // 重载页面
+        this.init('.page-' + this.name);
+        return this;
     },
 
     // 渲染到页面
-    render: function(id){
+    render: function(selector){
         var page = this;
         Page.ajax(function(data){
             // 缓存页面jQuery对象
             page._page = $(page.template(data));
 
-            // 执行内部预处理
-            page._prerender(data, page._page)
+            // 预处理, From System
+            Page.prerender(data, page._page)
 
-            page.include(data, page);
+            // 用户自定义操作, From User
+            page.include(data, page._page);
             
-            // 页面渲染预处理
+            // 预处理, From User
             page.prerender(data, page._page);
 
-            // 执行事件绑定
+            // 事件绑定, From User
             page.bind(data, page._page);
 
-            // 执行页面渲染 page.render
-            $(id || '#' + Page.renderId()).replaceWith(page._page);
+            // 检查是否默认显示
+            if(!page.display){
+                page._page.hide()
+            };
 
-            // 执行app.pagerender方法
+            // 页面渲染 page.render
+            $(selector || '#' + Page.renderId()).replaceWith(page._page);
+
+            // 后处理, From App
             Page.pagerender(page);
 
-            // 页面渲染后处理
+            // 后处理, From System
+            Page.postrender(data, page._page)
+
+            // 后处理, From User
             page.postrender(data, page._page);
         });
+    }
+})
+
+// Rewrite
+Page.include({
+    // 页面加载执行
+    enter: function(){
+
     },
 
+    // 页面离开执行
+    leave: function(){
+
+    },
+
+    // 自定义操作
+    include: function(){
+
+    },
+
+    // 自定义操作
+    // 建议用于事件绑定
+    bind: function(data, thisPage){
+
+    },
+
+    // 页面回退执行
+    back: function(){
+
+    },
+
+    // 预处理，页面渲染前执行
+    prerender: function(data, thisPage){
+
+    },
+
+    // 后处理，页面渲染后执行
+    postrender: function(data, thisPage){
+
+    }
+})
+
+// Supplementary
+Page.include({
+    // 页面显示状态
+    display: false,
+
     getPage: function(){
-        return this._page || $();
+        return this._page || [];
     },
 
     // 底层框架的调用入口
     // 类似：$(parent).find(child)
     find: function(selector){
         return this.getPage().find(selector);
-    },
-
-    // 页面实例离开方法
-    leave: function(){
-        this.getPage().hide();
-    },
-
-    include: function(){
-
-    },
-
-    // 内部使用，不允许覆盖
-    _prerender: function(data, thisPage){
-        thisPage.addClass('page-' + this.name)
-    },
-
-    // 内部使用，不允许覆盖
-    _postrender: function(data, thisPage){
-
-    },
-
-    // 页面渲染之前预处理，可以用来预加载页面模块
-    // 页面实例重写此方法
-    prerender: function(data, thisPage){
-
-    },
-
-    // 页面渲染之后处理，绑定方法之前执行
-    // 页面实例重写此方法
-    postrender: function(data, thisPage){
-
-    },
-
-    // 页面级事件绑定
-    // 页面实例重写此方法
-    bind: function(data, thisPage){
-
-    },
-
-    // 页面回退方法，默认调用系统回退
-    back: function(){
-
-    },
-
-    // 页面注册
-    reg: function(id){
-        this._id = id || '/' + this.name;
-        pm.reg(this);
-        pm.cache();
     },
 
     export: function(App, fn){
@@ -331,7 +369,4 @@ Page.fn.extend({
             item.call(page)
         })
     }
-
 });
-
-module.exports = Page;
