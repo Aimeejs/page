@@ -29,7 +29,7 @@ Page.extend({
     // Mockjs 模拟数据，仅用于测试
     mock: function(fn){
         var mock = require('mock').mock;
-        var data = require('pages/' + page.name + '/' + page.name + '.json.js');
+        var data = require(['pages', page.name, page.name+'.json.js'].join('/'));
 
         fn(mock(data));
         console.log('data corss mock.');
