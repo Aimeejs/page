@@ -73,12 +73,12 @@ Page.extend({
     },
 
     // 内部使用，不允许覆盖
-    prerender: function(data, thisPage){
-        thisPage.addClass('page-' + page.name)
+    prerender: function(data, page){
+        page.addClass('page-' + page.name)
     },
 
     // 内部使用，不允许覆盖
-    postrender: function(data, thisPage){
+    postrender: function(data, page){
 
     },
 
@@ -156,16 +156,16 @@ Page.include({
             page._page = $(page.template(data));
 
             // 预处理, From System
-            Page.prerender(data, page._page)
+            Page.prerender(data, page)
 
             // 用户自定义操作, From User
-            page.include(data, page._page);
+            page.include(data, page);
             
             // 预处理, From User
-            page.prerender(data, page._page);
+            page.prerender(data, page);
 
             // 事件绑定, From User
-            page.bind(data, page._page);
+            page.bind(data, page);
 
             // 检查是否默认显示
             if(!page.display){
@@ -179,10 +179,10 @@ Page.include({
             Page.pagerender(page);
 
             // 后处理, From System
-            Page.postrender(data, page._page)
+            Page.postrender(data, page)
 
             // 后处理, From User
-            page.postrender(data, page._page);
+            page.postrender(data, page);
         });
     }
 })
@@ -200,13 +200,13 @@ Page.include({
     },
 
     // 自定义操作
-    include: function(){
+    include: function(data, page){
 
     },
 
     // 自定义操作
     // 建议用于事件绑定
-    bind: function(data, thisPage){
+    bind: function(data, page){
 
     },
 
@@ -216,12 +216,12 @@ Page.include({
     },
 
     // 预处理，页面渲染前执行
-    prerender: function(data, thisPage){
+    prerender: function(data, page){
 
     },
 
     // 后处理，页面渲染后执行
-    postrender: function(data, thisPage){
+    postrender: function(data, page){
 
     }
 })
