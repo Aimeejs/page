@@ -13,66 +13,88 @@ home
 └── home.less 			// page的样式文件，可选，一般用不着
 ```
 
+**命令行/终端快速创建一个虚拟页**
+```
+$ aimee c -p home
+```
+
+**虚拟页js解释**
 ```javascript
 // 基本使用，定义一个 page
 var Page = require('page');
 var page = new Page;
 
 page.extend({
-	name: 'home',
-	template: require('./home.jade'),
+    name: 'home',
+    // 加载虚拟页模板
+    template: require('./home.jade'),
 
-	// 配置数据ajax请求参数
-	ajaxconfig: {
-		url: '/tmp/test.json',
-		dataType: 'json'
-	},
+    // 配置数据ajax请求参数
+    ajaxconfig: {
+        url: '/tmp/test.json',
+        dataType: 'json'
+    },
 
-	/**
-	 * 页面渲染前预处理
-	 * @param  {object}  data     页面ajax请求到的数据
-	 * @param  {object}  thisPage 当前页面的jQuery对象
-	 */
-	prerender: function(data, thisPage){
-		// 多app调用，仅用于测试的使用方法，这种用法会调用mock的模拟数据
-		this.exports('header footer teamCard')
+    /**
+     * 页面渲染前预处理，执行一次
+     * @param  {object}  data   页面ajax请求到的数据
+     * @param  {object}  page   虚拟页实例，同当前作用域this
+     */
+    prerender: function(data, page){
+        // 多app调用，仅用于测试的使用方法，这种用法会调用mock的模拟数据
+        this.exports('header footer teamCard')
 
-		// 异步，用于封装一个作用域，所有该模块的逻辑写在这里，提升代码可维护性
-		this.exports('nav', function(app){
-			// app是aimee-app对象，详细文档请参考 Aimee-app
-			app
-				// app数据与模板编译
-				.init(data)
-				// 操作内存中的app
-				.addClass('skin-white')
-				// 渲染到页面
-				.render();
-		})
+        // 直接传递数据调用
+        this.exports('list', {
+            list: [{}]
+        })
 
-		// 异步
-		this.exports('nav', function(app){
-			app
-				// app渲染前执行
-				.on('before', function(thisApp){
-					// your code
-				})
-				// app渲染后执行
-				.on('after', function(thisApp){
-					// your code
-				})
-				.init(data)
-				.skin('white')
-				.render();
-		})
+        // 异步，用于封装一个作用域，所有该模块的逻辑写在这里，提升代码可维护性
+        this.exports('nav', function(app){
+            // app是aimee-app对象，详细文档请参考 Aimee-app
+            app
+                // app数据与模板编译
+                .init(data)
+                // 操作内存中的app
+                .addClass('skin-white')
+                // 渲染到页面
+                .render();
+        })
 
-		// 模块同步调用
-		this.exports('share').skin('image')
-	},
+        // 异步
+        this.exports('nav', function(app){
+            app
+                .init(data)
+                .skin('white')
+                .render();
+        })
 
-	// 渲染后执行
-	postrender: function(data, thisPage){
+        // 模块同步调用
+        this.exports('share').skin('image')
 
-	}
+
+        // 直接调用
+        // 以上的调用方式都是对此种调用方式的高级封装
+        var Comment = require('comment');
+        var comment = new Comment;
+        comment.init().setPage(this).render();
+    },
+
+    // 渲染后执行，执行一次
+    postrender: function(data, page){
+
+    },
+
+    // 虚拟页每次进入时执行
+    enter: function(){
+        // 调用全局app
+        aimee.app.nav.show();
+    },
+
+    // 虚拟页每次离开时执行
+    leave: function(){
+        aimee.app.nav.hide();
+    }
 });
 
 module.exports = page;
