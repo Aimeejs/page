@@ -37,39 +37,45 @@ Page.extend({
 
     // Mock or ajax
     ajax: function(fn){
-        var options = this.ajaxOptions(fn);
-        !options.url || options.url === '/tmp/test.json' ?
-            this.mock(fn) :
-            $.ajax(Page.ajaxOptions(fn))
+        var p, options;
+        // 获取ajax配置
+        options = this.ajaxOptions();
+        // 配置不为空时
+        if(options.length){
+            p = options.map(function(conf){
+                return new Promise(function(res, rej){
+                    conf.success = res;
+                    conf.error = rej;
+                    $.ajax(conf)
+                })
+            })
+            Promise.all(p).then(function(arr){
+                arr.length === 1 ?
+                    fn(arr[0]) : fn(arr);
+            })
+        }
+        // 配置为空时返回自定义数据
+        else{
+            this.mock(fn)
+        }
     },
 
-    ajaxOptions: function(fn){
-        var opt, options;
+    ajaxOptions: function(){
+        var configs = [], arr, def;
 
-        options = {};
-        options.dataType = 'json';
+        Array.isArray(page.ajaxconfig) ?
+            arr = page.ajaxconfig:
+            arr = [page.ajaxconfig];
 
-        // Merge
-        opt = $.extend({}, options, page.ajaxconfig);
-
-        // 数据请求成功
-        opt.success = function(data, msg, xhr){
-            !fn || fn(data);
-            !page.ajaxconfig.success || page.ajaxconfig.success(data, msg, xhr);
-        }
-
-        // 数据请求失败
-        opt.error = function(xhr, msg){
-            !fn || fn({code: 1, msg: msg});
-            !page.ajaxconfig.error || page.ajaxconfig.error(data, msg, xhr);
-        }
-
+        // 检查是否是有效的ajax配置
+        arr.forEach(function(conf){
         // 检查ajax url地址
-        if(!opt.url){
-            console.warn('Warning: Not found ajax url.')
+            if(conf.url && conf.url !== '/tmp/test.json'){
+                configs.push(conf)
         }
+        })
 
-        return opt;
+        return configs;
     },
 
     // 内部使用，不允许覆盖
@@ -113,12 +119,14 @@ Page.include({
         this.render(selector);
         this.guid = aimee.guid();
         this.inited = true;
+        return this;
     },
 
     // 页面注册 => PM
     reg: function(id){
         this._id = id || '/' + this.name;
         pm.reg(this);
+        return this;
     },
 
     // 页面加载 => PM
@@ -129,6 +137,7 @@ Page.include({
         this.inited ? this.getPage().show() : this.init();
         // 执行用户自定义enter操作
             this.enter();
+        return this;
     },
 
     // 页面离开 => PM
@@ -139,6 +148,7 @@ Page.include({
         this.getPage().hide();
         // 执行用户自定义leave操作
         this.leave();
+        return this;
     },
 
     // 页面重载
