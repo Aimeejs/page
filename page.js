@@ -4,27 +4,17 @@
  * Homepage https://github.com/Aimeejs/page
  */
 
-var Page, page, pm, aimee, Class, zeptoArray;
+let page, zeptoArray;
 
-pm = require('pm');
-aimee = require('aimee');
-Class = require('class');
-Page = module.exports = Class.create();
+import pm from 'pm';
+import guid from 'guid';
+import Base from 'class';
 
-// Method Extend From Zepto
-zeptoArray = ('show hide on off delegate undelegate addClass removeClass ' +
-             'append prepend').split(' ');
-zeptoArray.forEach(function(name){
-    Page.fn[name] = function(){
-        $.fn[name].apply(this.getPage(), arguments)
-        return this;
-    }
-})
+class Privates {
 
-Page.extend({
     renderId: function(){
         return page.renderString + page.name;
-    },
+    }
 
     // Mockjs 模拟数据，仅用于测试
     mock: function(fn){
@@ -33,7 +23,7 @@ Page.extend({
 
         fn(mock(data));
         console.log('data corss mock.');
-    },
+    }
 
     // Mock or ajax
     ajax: function(fn){
@@ -58,7 +48,7 @@ Page.extend({
         else{
             this.mock(fn)
         }
-    },
+    }
 
     ajaxOptions: function(){
         var configs = [], arr, def;
@@ -76,17 +66,17 @@ Page.extend({
         })
 
         return configs;
-    },
+    }
 
     // 内部使用，不允许覆盖
     prerender: function(data, page){
         page.addClass('page-' + page.name)
-    },
+    }
 
     // 内部使用，不允许覆盖
     postrender: function(data, page){
 
-    },
+    }
 
     // 执行处理app.pagerender
     pagerender: function(page){
@@ -99,19 +89,19 @@ Page.extend({
             })
         }
     }
-})
+}
 
-// Base
-Page.include({
-    name: 'page',
-    renderString: 'lincoapp-page-',
-    aimee: {
-        page: true
+let privates = new Privates;
+
+class Page extends Base {
+
+    constructor() {
+        this.aimee = { page: true };
+        this.renderString = 'lincoapp-page-';
+        // 页面显示状态
+        this.display = false;
     }
-})
 
-// Core
-Page.include({
     // 页面实例初始化方法
     init: function(selector){
         page = this;
@@ -161,16 +151,16 @@ Page.include({
     // 渲染到页面
     render: function(selector){
         var page = this;
-        Page.ajax(function(data){
+        privates.ajax(function(data){
             // 缓存页面jQuery对象
             page._page = $(page.template(data));
 
             // 预处理, From System
-            Page.prerender(data, page)
+            privates.prerender(data, page)
 
             // 用户自定义操作, From User
             page.include(data, page);
-            
+
             // 预处理, From User
             page.prerender(data, page);
 
@@ -183,63 +173,18 @@ Page.include({
             };
 
             // 页面渲染 page.render
-            $(selector || '#' + Page.renderId()).replaceWith(page._page);
+            $(selector || '#' + privates.renderId()).replaceWith(page._page);
 
             // 后处理, From App
-            Page.pagerender(page);
+            privates.pagerender(page);
 
             // 后处理, From System
-            Page.postrender(data, page)
+            privates.postrender(data, page)
 
             // 后处理, From User
             page.postrender(data, page);
         });
     }
-})
-
-// Rewrite
-Page.include({
-    // 页面加载执行
-    enter: function(){
-
-    },
-
-    // 页面离开执行
-    leave: function(){
-
-    },
-
-    // 自定义操作
-    include: function(data, page){
-
-    },
-
-    // 自定义操作
-    // 建议用于事件绑定
-    bind: function(data, page){
-
-    },
-
-    // 页面回退执行
-    back: function(){
-
-    },
-
-    // 预处理，页面渲染前执行
-    prerender: function(data, page){
-
-    },
-
-    // 后处理，页面渲染后执行
-    postrender: function(data, page){
-
-    }
-})
-
-// Supplementary
-Page.include({
-    // 页面显示状态
-    display: false,
 
     getPage: function(){
         return this._page || [];
@@ -359,7 +304,7 @@ Page.include({
             fn = index;
             index = 0;
         }
-        
+
         if(fn){
             fn.call(this.app[id][index], this.app[id][index])
         }
@@ -379,4 +324,54 @@ Page.include({
             item.call(page)
         })
     }
-});
+
+    // Rewrite
+
+    // 页面加载执行
+    enter: function(){
+
+    },
+
+    // 页面离开执行
+    leave: function(){
+
+    },
+
+    // 自定义操作
+    include: function(data, page){
+
+    },
+
+    // 自定义操作
+    // 建议用于事件绑定
+    bind: function(data, page){
+
+    },
+
+    // 页面回退执行
+    back: function(){
+
+    },
+
+    // 预处理，页面渲染前执行
+    prerender: function(data, page){
+
+    },
+
+    // 后处理，页面渲染后执行
+    postrender: function(data, page){
+
+    }
+}
+
+// Method Extend From Zepto
+zeptoArray = ('show hide on off delegate undelegate addClass removeClass ' +
+             'append prepend').split(' ');
+zeptoArray.forEach(function(name){
+    Page.fn[name] = function(){
+        $.fn[name].apply(this.getPage(), arguments)
+        return this;
+    }
+})
+
+export default Page;
