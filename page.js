@@ -366,8 +366,7 @@ class Page extends Base {
 }
 
 // Method Extend From Zepto
-zeptoArray = ('show hide on off delegate undelegate addClass removeClass ' +
-             'before after append prepend appendTo prependTo').split(' ');
+zeptoArray = ('show hide on off delegate undelegate addClass removeClass before after append prepend appendTo prependTo').split(' ');
 zeptoArray.forEach(function(name){
     Page.prototype[name] = function(){
         $.fn[name].apply(this.getPage(), arguments)
