@@ -12,12 +12,12 @@ import Base from 'class';
 
 class Privates {
 
-    renderId: function(){
+    renderId() {
         return page.renderString + page.name;
     }
 
     // Mockjs 模拟数据，仅用于测试
-    mock: function(fn){
+    mock(fn) {
         var mock = require('mock').mock;
         var data = require(['pages', page.name, page.name+'.json.js'].join('/'));
 
@@ -26,7 +26,7 @@ class Privates {
     }
 
     // Mock or ajax
-    ajax: function(fn){
+    ajax(fn) {
         var p, options;
         // 获取ajax配置
         options = this.ajaxOptions();
@@ -50,7 +50,7 @@ class Privates {
         }
     }
 
-    ajaxOptions: function(){
+    ajaxOptions() {
         var configs = [], arr, def;
 
         Array.isArray(page.ajaxconfig) ?
@@ -69,17 +69,17 @@ class Privates {
     }
 
     // 内部使用，不允许覆盖
-    prerender: function(data, page){
+    prerender(data, page) {
         page.addClass('page-' + page.name)
     }
 
     // 内部使用，不允许覆盖
-    postrender: function(data, page){
+    postrender(data, page) {
 
     }
 
     // 执行处理app.pagerender
-    pagerender: function(page){
+    pagerender(page) {
         var map, arr;
         map = page.app;
         for(var key in map){
@@ -96,6 +96,7 @@ let privates = new Privates;
 class Page extends Base {
 
     constructor() {
+        super();
         this.aimee = { page: true };
         this.renderString = 'lincoapp-page-';
         // 页面显示状态
@@ -103,24 +104,24 @@ class Page extends Base {
     }
 
     // 页面实例初始化方法
-    init: function(selector){
+    init(selector) {
         page = this;
         this.app = {};
         this.render(selector);
         this.guid = aimee.guid();
         this.inited = true;
         return this;
-    },
+    }
 
     // 页面注册 => PM
-    reg: function(id){
+    reg(id) {
         this._id = id || '/' + this.name;
         pm.reg(this);
         return this;
-    },
+    }
 
     // 页面加载 => PM
-    load: function(){
+    load() {
         // 更新目标页面状态
         this.display = true;
         // 加载页面
@@ -128,10 +129,10 @@ class Page extends Base {
         // 执行用户自定义enter操作
             this.enter();
         return this;
-    },
+    }
 
     // 页面离开 => PM
-    unload: function(){
+    unload() {
         // 更新目标页面状态
         this.display = false;
         // 页面隐藏
@@ -139,17 +140,17 @@ class Page extends Base {
         // 执行用户自定义leave操作
         this.leave();
         return this;
-    },
+    }
 
     // 页面重载
-    reload: function(){
+    reload() {
         // 重载页面
         this.init('.page-' + this.name);
         return this;
-    },
+    }
 
     // 渲染到页面
-    render: function(selector){
+    render(selector) {
         var page = this;
         privates.ajax(function(data){
             // 缓存页面jQuery对象
@@ -186,17 +187,17 @@ class Page extends Base {
         });
     }
 
-    getPage: function(){
+    getPage() {
         return this._page || [];
-    },
+    }
 
     // 底层框架的调用入口
     // 类似：$(parent).find(child)
-    find: function(selector){
+    find(selector) {
         return this.getPage().find(selector);
-    },
+    }
 
-    export: function(App, fn){
+    export(App, fn) {
         var data = {};
         var app = new App;
         this.app ? '' : this.app = {};
@@ -248,14 +249,14 @@ class Page extends Base {
         if(!fn){
             return app;
         }
-    },
+    }
 
     /**
      * 页面调用模块的推荐方法，使用该方法调用的模块会被缓存到page.app对象中，方面后续直接引用或调试
      * @param  {String [|| Array || Function]}   id 推荐参数，为模块id，字符串
      * @param  {Function} 						 fn 回调，参数返回当前模块app对象
      */
-    exports: function(id, fn){
+    exports(id, fn) {
         var App, app, self = this;
 
         // id === string
@@ -286,7 +287,7 @@ class Page extends Base {
             return this;
         };
         return this;
-    },
+    }
 
     /**
      * 查找页面中已被渲染的模块
@@ -295,7 +296,7 @@ class Page extends Base {
      * @param  {Function} fn    回调
      * @return {[type]}         当前页面对象
      */
-    search: function(id, index, fn){
+    search(id, index, fn) {
         if(!index || index === 0){
             index = 0;
         }
@@ -311,13 +312,13 @@ class Page extends Base {
         else{
             return this.app[id][index];
         }
-    },
+    }
 
-    query: function(){
+    query() {
         return this.search.apply(this, arguments);
-    },
+    }
 
-    running: function(){
+    running() {
         var page = this;
         [].slice.call(arguments, 0)
         .forEach(function(item){
@@ -328,47 +329,47 @@ class Page extends Base {
     // Rewrite
 
     // 页面加载执行
-    enter: function(){
+    enter() {
 
-    },
+    }
 
     // 页面离开执行
-    leave: function(){
+    leave() {
 
-    },
+    }
 
     // 自定义操作
-    include: function(data, page){
+    include(data, page) {
 
-    },
+    }
 
     // 自定义操作
     // 建议用于事件绑定
-    bind: function(data, page){
+    bind(data, page) {
 
-    },
+    }
 
     // 页面回退执行
-    back: function(){
+    back() {
 
-    },
+    }
 
     // 预处理，页面渲染前执行
-    prerender: function(data, page){
+    prerender(data, page) {
 
-    },
+    }
 
     // 后处理，页面渲染后执行
-    postrender: function(data, page){
+    postrender(data, page) {
 
     }
 }
 
 // Method Extend From Zepto
 zeptoArray = ('show hide on off delegate undelegate addClass removeClass ' +
-             'append prepend').split(' ');
+             'before after append prepend appendTo prependTo').split(' ');
 zeptoArray.forEach(function(name){
-    Page.fn[name] = function(){
+    Page.prototype[name] = function(){
         $.fn[name].apply(this.getPage(), arguments)
         return this;
     }
