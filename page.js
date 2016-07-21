@@ -53,6 +53,10 @@ class Privates {
     ajaxOptions() {
         var configs = [], arr, def;
 
+        if(!page.ajaxconfig){
+            return configs;
+        }
+
         Array.isArray(page.ajaxconfig) ?
             arr = page.ajaxconfig:
             arr = [page.ajaxconfig];
@@ -108,7 +112,7 @@ class Page extends Base {
         page = this;
         this.app = {};
         this.render(selector);
-        this.guid = aimee.guid();
+        this.guid = guid();
         this.inited = true;
         return this;
     }
@@ -364,6 +368,8 @@ class Page extends Base {
 
     }
 }
+
+Page.aimee = { page: true }
 
 // Method Extend From Zepto
 zeptoArray = ('show hide on off delegate undelegate addClass removeClass before after append prepend appendTo prependTo').split(' ');

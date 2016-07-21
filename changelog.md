@@ -1,3 +1,16 @@
+v2.0.1
+---
+Fixbug 修正``virtual page``在没有配置ajaxconfig时报错的问题
+
+v2.0.0
+---
+* ES6重构
+* 从Zepto复制before,after等方法到page
+* page.ajaxconfig增加支持多个ajax配置功能，多个配置为数组，单个配置保持和之前一样配置为对象
+* 修改page.prerender, page.postrender, page.include, page.bind的thisPage参数为page
+* Zepto实例 => App实例，获取原有thisPage可以执行page.getPage()
+* 兼容修正fis3处理'pages/'会丢失'/'的问题
+
 v1.0.6
 ---
 优化Page.ajax方法，在非mock模式下，验证是否存在有效ajax.url，非mock模式下兼容调用mock数据
