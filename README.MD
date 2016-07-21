@@ -1,4 +1,4 @@
-# App
+# Page
 [Aimeejs](https://github.com/gavinning/aimee)
 可以基于此创建Virtual page
 
