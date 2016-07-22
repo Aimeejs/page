@@ -101,6 +101,8 @@ class Page extends Base {
 
     constructor() {
         super();
+        this.app = {};
+        this.guid = guid();
         this.aimee = { page: true };
         this.renderString = 'lincoapp-page-';
         // 页面显示状态
@@ -110,9 +112,8 @@ class Page extends Base {
     // 页面实例初始化方法
     init(selector) {
         page = this;
-        this.app = {};
+        this.onload();
         this.render(selector);
-        this.guid = guid();
         this.inited = true;
         return this;
     }
@@ -151,6 +152,30 @@ class Page extends Base {
         // 重载页面
         this.init('.page-' + this.name);
         return this;
+    }
+
+    /**
+     * 批量绑定事件
+     * @param   {Object}  events 事件对象模型
+     * @example
+     * this.bind({
+     * 		'click@.lincoapp-footer': () => {
+     * 			// do something
+     * 		}
+     * 		'click, focus@.lincoapp-comment': () => {
+     * 			// do something
+     * 		}
+     * })
+     */
+    bind(events) {
+        events = events || {};
+        $.each(events, (key, fn) => {
+            let pair = key.split('@');
+            let evts = pair[0].split(/,\s*/g);
+            evts.forEach((type) => {
+                this.on(type, pair[1], fn)
+            })
+        })
     }
 
     // 渲染到页面
@@ -331,6 +356,11 @@ class Page extends Base {
     }
 
     // Rewrite
+
+    // 初始化后执行
+    onload() {
+
+    }
 
     // 页面加载执行
     enter() {

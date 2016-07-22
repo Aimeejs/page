@@ -1,3 +1,8 @@
+v2.1.0
+---
+* 新增框架级事件绑定方法``bind``用于批量绑定事件
+* 新增流程控制方法``onload``用于对数据进行包装，``onload``将在init之后自动执行，无需开发者调用
+
 v2.0.1
 ---
 Fixbug 修正``virtual page``在没有配置ajaxconfig时报错的问题
@@ -35,7 +40,7 @@ v1.0.2
 ---
 优化page.render前后方法注册顺序，优化app.pagerender触发时机  
 ```
-page.include > page.prerender > page.bind > page.render > app.pagerender > page.postrender 
+page.include > page.prerender > page.bind > page.render > app.pagerender > page.postrender
 ```   
 优化page.search方法，设定索引默认值为0，允许参数为空，默认调用第一个实例
 ```javascript
