@@ -1,3 +1,8 @@
+v2.1.1
+---
+* 删除page自身对page.bind的调用
+* Fixbug 删除原有的page.bind方法，修正与覆盖新的page.bind的问题
+
 v2.1.0
 ---
 * 新增框架级事件绑定方法``bind``用于批量绑定事件

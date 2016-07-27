@@ -194,9 +194,6 @@ class Page extends Base {
             // 预处理, From User
             page.prerender(data, page);
 
-            // 事件绑定, From User
-            page.bind(data, page);
-
             // 检查是否默认显示
             if(!page.display){
                 page._page.hide()
@@ -374,12 +371,6 @@ class Page extends Base {
 
     // 自定义操作
     include(data, page) {
-
-    }
-
-    // 自定义操作
-    // 建议用于事件绑定
-    bind(data, page) {
 
     }
 
