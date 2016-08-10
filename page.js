@@ -226,7 +226,6 @@ class Page extends Base {
     export(App, fn) {
         var data = {};
         var app = new App;
-        this.app ? '' : this.app = {};
 
         // 检查简单调用
         // data === fn
@@ -346,10 +345,28 @@ class Page extends Base {
 
     running() {
         var page = this;
-        [].slice.call(arguments, 0)
+        Array.from(arguments)
         .forEach(function(item){
             item.call(page)
         })
+    }
+
+    // 批量加载app
+    use(id, fn) {
+        if($.isPlainObject(id)){
+            // appname^Number 表示同一个app被多次使用，^Number仅作为标记，没有特殊意义
+            $.each(id, (k, v) => this.export(require(k.split('^')[0]), v));
+            return this;
+        }
+        if(fn){
+            this.export(require(id), fn);
+            return this;
+        }
+        let app = new (require(id));
+        // 缓存app对象到页面
+        this.app[app.name] ? '' : this.app[app.name] = [];
+        this.app[app.name].push(app);
+        return app;
     }
 
     // Rewrite

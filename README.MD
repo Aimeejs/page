@@ -28,6 +28,7 @@ class Home extends Page {
         this.template = template;
     }
 
+    // 支持多接口，多接口以数组形式返回
     get ajaxconfig() {
         return {
             url: '/api/home/get',
@@ -40,9 +41,26 @@ class Home extends Page {
         aimee.app.loading.show()
     }
 
+    // 渲染预处理
     prerender(data) {
         // 加载tags.app
         this.exports('tags', data.tag);
+
+        // 批量加载app
+        this.use({
+            'nav': app => app.init().render(),
+
+            'list': app => {
+                app.init().render();
+                app.find(selector).remove();
+            },
+
+            // 同页面加载app多个实例时，使用^符号分割标识符，标识符没有特殊意义，只表示key的唯一性
+            'list^2': app => {
+                app.init().render();
+                app.find(selector).remove();
+            }
+        })
 
         // 为Virtual Page绑定事件，推荐在app内执行事件绑定
         this.bind({
@@ -64,14 +82,17 @@ class Home extends Page {
         })
     }
 
+    // 渲染后处理
     postrender(data) {
         aimee.app.loading.hide();
     }
 
+    // 每次进入当前虚拟页时执行
     enter() {
 
     }
 
+    // 每次离开当前虚拟页时执行
     leave() {
 
     }
