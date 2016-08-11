@@ -264,6 +264,7 @@ class Page extends Base {
 
         // 缓存引用页面对象
         app.page = this;
+        app.parent = this;
 
         // 缓存pm对象
         app.pm = this.pm;

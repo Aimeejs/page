@@ -1,7 +1,7 @@
 {
     "name": "page",
     "aimee": "app",
-    "version": "2.1.2",
+    "version": "2.1.3",
     "description": "Aimeejs的page模块，支持虚拟页",
     "main": "page.js",
     "scripts": {
